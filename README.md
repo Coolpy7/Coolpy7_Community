@@ -19,7 +19,7 @@ Coolpy7社区版 是基于Epoll为通信核心开发的高性能MQTT服务库，
     - `Qos全支持` 支持Qos0 Qos1 Qos2
     - `WebSocket` 提供高性能Websocket桥接MQTT服务
     - `JWT验证` 提供JWT密钥验证（token于password连接参数）
-    - 支持 `Linux`，`MacOS`，`Windows`（操作系统）
+    - 支持 `Linux`（操作系统）
 
 # 快速开始
 
@@ -64,7 +64,7 @@ $ Usage of ./Coolpy7_Community_XXX:
 * 启动服务前请先确认相关执行权限
 
 ```
-$ ./Coolpy7_Community_XXX -l=:1883 -w=:8083
+$ ./coolpy7_community_xxx -l=:1883 -w=:8083
 $ 2023/06/21 17:57:16 Coolpy7 Community On Port :1883
 $ 2023/06/21 17:57:16 Coolpy7 Community Websocket On Port :8083
 
