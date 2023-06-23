@@ -41,7 +41,7 @@ func main() {
 		wsAddr       = flag.String("w", ":8083", "host ws port (default 8083)")
 		wsPem        = flag.String("wp", "", "wss pem file path")
 		wsKey        = flag.String("wk", "", "wss key file path")
-		jwtSecretKey = flag.String("j", "", "jwt secret key(multiple split by ,")
+		jwtSecretKey = flag.String("j", "", "jwt secret key(multiple split by ,)")
 	)
 	flag.Parse()
 
@@ -198,7 +198,6 @@ func OnMessage(conn *pollio.Conn, data []byte) {
 	}
 	err = c.Receive(pkt)
 	if err != nil {
-		c.ClearWill()
 		OnDisconnect(conn, nil)
 	}
 }

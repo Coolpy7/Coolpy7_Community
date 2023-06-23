@@ -424,8 +424,9 @@ func (c *Client) processPubcomp(id packet.ID) error {
 }
 
 func (c *Client) processDisconnect() error {
+	c.ClearWill()
 	//ws conn abort
-	if strings.Contains(c.conn.RemoteAddr().String(), "127.0.0.1") {
+	if strings.Contains(c.conn.RemoteAddr().String(), "@") {
 		_ = c.conn.Close()
 	}
 	return errors.New("disCon")
