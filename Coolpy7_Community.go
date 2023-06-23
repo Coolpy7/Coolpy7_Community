@@ -168,7 +168,6 @@ func OnDisconnect(conn *pollio.Conn, err error) {
 		c.Clear()
 		eng.DelClient(conn)
 	}
-	log.Println("dis")
 }
 
 func OnMessage(conn *pollio.Conn, data []byte) {
