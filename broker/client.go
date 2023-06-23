@@ -43,10 +43,13 @@ type Client struct {
 	eng   *Engine
 	tm    timer.TimeNoder
 	Cache bytes.Buffer
+
+	isLogin bool
 }
 
 func NewClient(conn *pollio.Conn, eng *Engine) *Client {
 	c := &Client{
+		isLogin:    false,
 		isTls:      false,
 		conn:       conn,
 		eng:        eng,
@@ -55,6 +58,12 @@ func NewClient(conn *pollio.Conn, eng *Engine) *Client {
 		Cache:      bytes.Buffer{},
 	}
 	c.tm = eng.tm.ScheduleFunc(30*time.Second, c.TickFunc)
+	//客户端连接后2秒种内接收不到登陆包直接关闭连接
+	time.AfterFunc(2*time.Second, func() {
+		if !c.isLogin {
+			_ = c.conn.Close()
+		}
+	})
 	return c
 }
 
@@ -131,6 +140,7 @@ func (c *Client) Receive(pkt packet.Generic) (err error) {
 		if err != nil {
 			return err
 		}
+		c.isLogin = true
 		return nil
 	}
 
@@ -429,10 +439,15 @@ func (c *Client) processDisconnect() error {
 	if strings.Contains(c.conn.RemoteAddr().String(), "@") {
 		_ = c.conn.Close()
 	}
-	return errors.New("disCon")
+	_ = c.conn.Close()
+	return nil
 }
 
 func (c *Client) Clear() {
 	c.tm.Stop()
 	c.eng.Subscribed.Clear(c)
+}
+
+func (c *Client) Close() {
+	_ = c.conn.Close()
 }

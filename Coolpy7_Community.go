@@ -165,13 +165,13 @@ func OnDisconnect(conn *pollio.Conn, err error) {
 		go c.Wills()
 		c.Clear()
 		eng.DelClient(conn)
-		_ = conn.Close()
 	}
 }
 
 func OnMessage(conn *pollio.Conn, data []byte) {
 	c, ok := eng.GetClient(conn)
 	if !ok {
+		_ = conn.Close()
 		return
 	}
 	c.Cache.Write(data)
@@ -179,26 +179,27 @@ func OnMessage(conn *pollio.Conn, data []byte) {
 	if packetLength <= 0 {
 		return
 	}
-	if c.Cache.Len() < packetLength {
+	if uint64(packetLength) > packet.MaxVarint {
+		c.Close()
 		return
 	}
-	if uint64(packetLength) > packet.MaxVarint {
-		OnDisconnect(conn, nil)
+	if c.Cache.Len() < packetLength {
 		return
 	}
 	defer c.Cache.Truncate(0)
 	pkt, err := packetType.New()
 	if err != nil {
-		OnDisconnect(conn, nil)
+		c.Close()
 		return
 	}
 	_, err = pkt.Decode(c.Cache.Bytes())
 	if err != nil {
+		c.Close()
 		return
 	}
 	err = c.Receive(pkt)
 	if err != nil {
-		OnDisconnect(conn, nil)
+		c.Close()
 	}
 }
 
