@@ -44,11 +44,13 @@ type Client struct {
 	tm    timer.TimeNoder
 	Cache bytes.Buffer
 
-	isLogin bool
+	isLogin  bool
+	pingTime int64
 }
 
 func NewClient(conn *pollio.Conn, eng *Engine) *Client {
 	c := &Client{
+		pingTime:   0,
 		isLogin:    false,
 		isTls:      false,
 		conn:       conn,
@@ -235,7 +237,15 @@ func (c *Client) processPingreq() error {
 	if err != nil {
 		return err
 	}
-
+	if c.pingTime == 0 {
+		c.pingTime = time.Now().Unix()
+	} else {
+		if int(time.Now().Unix()-c.pingTime) < c.eng.SelfDdosDeny {
+			return errors.New("self ddos")
+		} else {
+			c.pingTime = time.Now().Unix()
+		}
+	}
 	return nil
 }
 

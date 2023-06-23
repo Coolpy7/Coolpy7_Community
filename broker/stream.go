@@ -21,6 +21,10 @@ import (
 )
 
 func (c *Client) send(pkt packet.Generic) error {
+	isClose, err := c.conn.IsClosed()
+	if err == nil && isClose {
+		return errors.New("closed")
+	}
 	buf := mempool.Malloc(pkt.Len())
 	defer mempool.Free(buf)
 	n, _ := pkt.Encode(buf)

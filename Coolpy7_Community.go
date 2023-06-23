@@ -42,6 +42,7 @@ func main() {
 		wsPem        = flag.String("wp", "", "wss pem file path")
 		wsKey        = flag.String("wk", "", "wss key file path")
 		jwtSecretKey = flag.String("j", "", "jwt secret key(multiple split by ,)")
+		SelfDdos     = flag.Int("sd", 60, "self ddos deny")
 	)
 	flag.Parse()
 
@@ -54,6 +55,7 @@ func main() {
 			}
 		}
 	}
+	eng.SelfDdosDeny = *SelfDdos
 
 	if err := os.RemoveAll(wsProxy.SockAddr); err != nil {
 		log.Fatal(err)
@@ -166,6 +168,7 @@ func OnDisconnect(conn *pollio.Conn, err error) {
 		c.Clear()
 		eng.DelClient(conn)
 	}
+	log.Println("dis")
 }
 
 func OnMessage(conn *pollio.Conn, data []byte) {

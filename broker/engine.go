@@ -32,10 +32,12 @@ type Engine struct {
 	Qos2RelStore *multimap.MultiMap
 	tm           timer.Timer
 	JwtSecretKey [][]byte
+	SelfDdosDeny int
 }
 
 func NewEngine() *Engine {
 	eng := Engine{
+		SelfDdosDeny: 60,
 		Subscribed:   topic.NewStandardTree(),
 		Retained:     &sync.Map{},
 		Clients:      &sync.Map{},
