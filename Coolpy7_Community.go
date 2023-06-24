@@ -45,7 +45,7 @@ func main() {
 		wsPem        = flag.String("wp", "", "wss pem file path")
 		wsKey        = flag.String("wk", "", "wss key file path")
 		jwtSecretKey = flag.String("j", "", "jwt secret key(multiple split by ,)")
-		SelfDdos     = flag.Int("sd", 60, "self ddos deny")
+		SelfDdos     = flag.Int("sd", 59, "self ddos deny")
 	)
 	flag.Parse()
 
@@ -66,7 +66,7 @@ func main() {
 	pollUnix := pollio.NewEngine(pollio.Config{
 		Network:            "unix", //"udp", "unix"
 		Addrs:              []string{wsProxy.SockAddr},
-		MaxWriteBufferSize: 6 * 1024 * 1024,
+		MaxWriteBufferSize: 2 * 1024 * 1024,
 		EPOLLONESHOT:       unix.EPOLLONESHOT,
 		EpollMod:           unix.EPOLLET,
 	})
@@ -80,7 +80,7 @@ func main() {
 	poll := pollio.NewEngine(pollio.Config{
 		Network:            "tcp", //"udp", "unix"
 		Addrs:              []string{*addr},
-		MaxWriteBufferSize: 6 * 1024 * 1024,
+		MaxWriteBufferSize: 2 * 1024 * 1024,
 		EPOLLONESHOT:       unix.EPOLLONESHOT,
 		EpollMod:           unix.EPOLLET,
 	})
