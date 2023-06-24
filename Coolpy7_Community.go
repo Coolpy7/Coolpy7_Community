@@ -30,6 +30,9 @@ import (
 	"syscall"
 )
 
+var version = "1.0.1"
+var goversion = "1.19.4"
+
 var eng *broker.Engine
 
 func main() {
@@ -135,6 +138,7 @@ func main() {
 	if err != nil {
 		log.Printf("Coolpy7 ws host error %s", err)
 	}
+	log.Printf("Coolpy7 v%s build golang v%s", version, goversion)
 
 	signalChan := make(chan os.Signal, 1)
 	cleanupDone := make(chan bool)
