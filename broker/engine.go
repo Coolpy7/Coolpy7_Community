@@ -33,11 +33,15 @@ type Engine struct {
 	tm           timer.Timer
 	JwtSecretKey [][]byte
 	SelfDdosDeny int
+	LazyMsgSend  int
+	NilConnDeny  int
 }
 
 func NewEngine() *Engine {
 	eng := Engine{
 		SelfDdosDeny: 60,
+		LazyMsgSend:  30,
+		NilConnDeny:  2,
 		Subscribed:   topic.NewStandardTree(),
 		Retained:     &sync.Map{},
 		Clients:      &sync.Map{},

@@ -45,7 +45,9 @@ func main() {
 		wsPem        = flag.String("wp", "", "wss pem file path")
 		wsKey        = flag.String("wk", "", "wss key file path")
 		jwtSecretKey = flag.String("j", "", "jwt secret key(multiple split by ,)")
-		SelfDdos     = flag.Int("sd", 59, "self ddos deny")
+		SelfDdos     = flag.Int("sd", 59, "self ddos deny seconds")
+		LazyMsg      = flag.Int("lm", 30, "lazy qos message resend seconds")
+		NilConn      = flag.Int("nc", 2, "nil connect deny seconds")
 	)
 	flag.Parse()
 
@@ -59,6 +61,8 @@ func main() {
 		}
 	}
 	eng.SelfDdosDeny = *SelfDdos
+	eng.LazyMsgSend = *LazyMsg
+	eng.NilConnDeny = *NilConn
 
 	if err := os.RemoveAll(wsProxy.SockAddr); err != nil {
 		log.Fatal(err)
