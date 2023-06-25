@@ -68,11 +68,10 @@ func main() {
 		log.Fatal(err)
 	}
 	pollUnix := pollio.NewEngine(pollio.Config{
-		Network:            "unix", //"udp", "unix"
-		Addrs:              []string{wsProxy.SockAddr},
-		MaxWriteBufferSize: 2 * 1024 * 1024,
-		EPOLLONESHOT:       unix.EPOLLONESHOT,
-		EpollMod:           unix.EPOLLET,
+		Network:      "unix", //"udp", "unix"
+		Addrs:        []string{wsProxy.SockAddr},
+		EPOLLONESHOT: unix.EPOLLONESHOT,
+		EpollMod:     unix.EPOLLET,
 	})
 	// hanlde new connection
 	pollUnix.OnOpen(OnConnect)
@@ -82,11 +81,10 @@ func main() {
 	pollUnix.OnData(OnMessage)
 
 	poll := pollio.NewEngine(pollio.Config{
-		Network:            "tcp", //"udp", "unix"
-		Addrs:              []string{*addr},
-		MaxWriteBufferSize: 2 * 1024 * 1024,
-		EPOLLONESHOT:       unix.EPOLLONESHOT,
-		EpollMod:           unix.EPOLLET,
+		Network:      "tcp", //"udp", "unix"
+		Addrs:        []string{*addr},
+		EPOLLONESHOT: unix.EPOLLONESHOT,
+		EpollMod:     unix.EPOLLET,
 	})
 
 	if *pem != "" && *key != "" {
