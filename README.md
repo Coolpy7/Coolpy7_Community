@@ -20,6 +20,8 @@ Coolpy7社区版 是基于Epoll为通信核心开发的高性能MQTT服务库，
     - `WebSocket` 提供高性能Websocket桥接MQTT服务
     - `JWT验证` 提供JWT密钥验证（token于password连接参数）
     - 支持 `Linux`（操作系统）
+    - 防空连接攻击
+    - 防`Self Ddos`攻击
 
 # 快速开始
 
@@ -30,8 +32,8 @@ Coolpy7社区版 是基于Epoll为通信核心开发的高性能MQTT服务库，
 ### 2 服务参数
 
 ```
-$ ./Coolpy7_Community_XXX -h
-$ Usage of ./Coolpy7_Community_XXX:
+$ ./coolpy7_community_linux -h
+$ Usage of ./coolpy7_community_linux:
   -j string
         jwt secret key(multiple split by ,
   -k string
