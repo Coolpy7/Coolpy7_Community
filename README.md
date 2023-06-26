@@ -92,150 +92,125 @@ $ 2023/06/21 17:57:16 Coolpy7 Community Websocket On Port :8083
 
 ### Qos0压力测试
 ```
-./mqtt-stresser-linux-amd64 -broker tcp://192.168.0.7:7006 -num-clients 100 -num-messages 1500 -rampup-delay 1s -rampup-size 10 -global-timeout 30s -timeout 10s -constant-payload 100
+./mqtt-stresser-linux-amd64 -broker tcp://172.18.157.151:1883 -num-clients 10 -num-messages 150 -rampup-delay 1s -rampup-size 10 -global-timeout 180s -timeout 20s
 ```
 ```
 # Configuration
-Concurrent Clients: 100
-Messages / Client:  150000
+Concurrent Clients: 10
+Messages / Client:  1500
 
 # Results
-Published Messages: 150000 (100%)
-Received Messages:  108852 (73%)
-Completed:          6 (6%)
-Errors:             1 (1%)
-- ConnectFailed:      0 (0%)
-- SubscribeFailed:    0 (0%)
-- TimeoutExceeded:    1 (100%)
-- Aborted:            93 (93%)
+Published Messages: 1500 (100%)
+Received Messages:  992 (66%)
+Completed:          0 (0%)
+Errors:             0 (0%)
 
 # Publishing Throughput
-Fastest: 218333 msg/sec
-Slowest: 18942 msg/sec
-Median: 73253 msg/sec
+Fastest: 84124 msg/sec
+Slowest: 19982 msg/sec
+Median: 63101 msg/sec
 
-  < 38881 msg/sec  17%
-  < 58820 msg/sec  36%
-  < 78759 msg/sec  56%
-  < 98698 msg/sec  69%
-  < 118637 msg/sec  75%
-  < 138577 msg/sec  80%
-  < 158516 msg/sec  85%
-  < 178455 msg/sec  90%
-  < 198394 msg/sec  94%
-  < 218333 msg/sec  99%
-  < 238272 msg/sec  100%
+  < 26396 msg/sec  20%
+  < 45639 msg/sec  30%
+  < 52053 msg/sec  40%
+  < 58467 msg/sec  50%
+  < 77710 msg/sec  80%
+  < 84124 msg/sec  90%
+  < 90538 msg/sec  100%
 
 # Receiving Througput
-Fastest: 132334 msg/sec
-Slowest: 10472 msg/sec
-Median: 19992 msg/sec
+Fastest: 109125 msg/sec
+Slowest: 18135 msg/sec
+Median: 28378 msg/sec
 
-  < 22658 msg/sec  59%
-  < 34844 msg/sec  93%
-  < 47030 msg/sec  96%
-  < 59216 msg/sec  97%
-  < 83589 msg/sec  98%
-  < 95775 msg/sec  99%
-  < 144520 msg/sec  100%
+  < 27234 msg/sec  50%
+  < 36333 msg/sec  60%
+  < 45432 msg/sec  80%
+  < 90927 msg/sec  90%
+  < 118224 msg/sec  100%
 ```
 
 ### Qos1压力测试
 ```
-./mqtt-stresser-linux-amd64 -broker tcp://192.168.0.7:7006 -num-clients 100 -num-messages 1500 -rampup-delay 1s -rampup-size 10 -global-timeout 30s -timeout 10s -constant-payload 100 -publisher-qos 1  -subscriber-qos 1
+./mqtt-stresser-linux-amd64 -broker tcp://172.18.157.151:1883 -num-clients 10 -num-messages 150 -rampup-delay 1s -rampup-size 10 -global-timeout 180s -timeout 20s -publisher-qos 1  -subscriber-qos 1
 ```
 ```
+..........
 # Configuration
-Concurrent Clients: 100
-Messages / Client:  150000
+Concurrent Clients: 10
+Messages / Client:  1500
 
 # Results
-Published Messages: 150000 (100%)
-Received Messages:  150000 (100%)
-Completed:          100 (100%)
+Published Messages: 1500 (100%)
+Received Messages:  1500 (100%)
+Completed:          10 (100%)
 Errors:             0 (0%)
 
 # Publishing Throughput
-Fastest: 7524 msg/sec
-Slowest: 4690 msg/sec
-Median: 6028 msg/sec
+Fastest: 5699 msg/sec
+Slowest: 5046 msg/sec
+Median: 5295 msg/sec
 
-  < 4974 msg/sec  7%
-  < 5257 msg/sec  16%
-  < 5540 msg/sec  33%
-  < 5824 msg/sec  39%
-  < 6107 msg/sec  52%
-  < 6391 msg/sec  63%
-  < 6674 msg/sec  67%
-  < 6957 msg/sec  74%
-  < 7241 msg/sec  86%
-  < 7524 msg/sec  99%
-  < 7807 msg/sec  100%
+  < 5111 msg/sec  10%
+  < 5176 msg/sec  20%
+  < 5241 msg/sec  30%
+  < 5307 msg/sec  60%
+  < 5437 msg/sec  80%
+  < 5503 msg/sec  90%
+  < 5764 msg/sec  100%
 
 # Receiving Througput
-Fastest: 141490 msg/sec
-Slowest: 24047 msg/sec
-Median: 51706 msg/sec
+Fastest: 59043 msg/sec
+Slowest: 25028 msg/sec
+Median: 31189 msg/sec
 
-  < 35792 msg/sec  8%
-  < 47536 msg/sec  41%
-  < 59280 msg/sec  68%
-  < 71025 msg/sec  80%
-  < 82769 msg/sec  88%
-  < 94513 msg/sec  92%
-  < 106257 msg/sec  93%
-  < 118002 msg/sec  94%
-  < 129746 msg/sec  95%
-  < 141490 msg/sec  99%
-  < 153234 msg/sec  100%
+  < 28429 msg/sec  40%
+  < 31831 msg/sec  50%
+  < 35232 msg/sec  70%
+  < 38634 msg/sec  80%
+  < 52240 msg/sec  90%
+  < 62445 msg/sec  100%
 ```
 
 ### Qos2压力测试
 ```
-./mqtt-stresser-linux-amd64 -broker tcp://192.168.0.7:7006 -num-clients 100 -num-messages 1500 -rampup-delay 1s -rampup-size 10 -global-timeout 30s -timeout 10s -constant-payload 100 -publisher-qos 2  -subscriber-qos 2
+./mqtt-stresser-linux-amd64 -broker tcp://172.18.157.151:1883 -num-clients 10 -num-messages 150 -rampup-delay 1s -rampup-size 10 -global-timeout 180s -timeout 20s -publisher-qos 2  -subscriber-qos 2
 ```
 ```
 # Configuration
-Concurrent Clients: 100
-Messages / Client:  150000
+Concurrent Clients: 10
+Messages / Client:  1500
 
 # Results
-Published Messages: 150000 (100%)
-Received Messages:  150000 (100%)
-Completed:          100 (100%)
+Published Messages: 1500 (100%)
+Received Messages:  1500 (100%)
+Completed:          10 (100%)
 Errors:             0 (0%)
 
 # Publishing Throughput
-Fastest: 4493 msg/sec
-Slowest: 2737 msg/sec
-Median: 3380 msg/sec
+Fastest: 3187 msg/sec
+Slowest: 2841 msg/sec
+Median: 3101 msg/sec
 
-  < 2913 msg/sec  14%
-  < 3088 msg/sec  33%
-  < 3264 msg/sec  41%
-  < 3440 msg/sec  53%
-  < 3615 msg/sec  61%
-  < 3791 msg/sec  70%
-  < 3967 msg/sec  79%
-  < 4142 msg/sec  86%
-  < 4318 msg/sec  97%
-  < 4493 msg/sec  99%
-  < 4669 msg/sec  100%
+  < 2876 msg/sec  10%
+  < 2910 msg/sec  20%
+  < 2945 msg/sec  30%
+  < 3049 msg/sec  40%
+  < 3083 msg/sec  50%
+  < 3152 msg/sec  80%
+  < 3187 msg/sec  90%
+  < 3221 msg/sec  100%
 
 # Receiving Througput
-Fastest: 145966 msg/sec
-Slowest: 38577 msg/sec
-Median: 74970 msg/sec
+Fastest: 36544 msg/sec
+Slowest: 12518 msg/sec
+Median: 22943 msg/sec
 
-  < 49316 msg/sec  7%
-  < 60055 msg/sec  20%
-  < 70794 msg/sec  38%
-  < 81533 msg/sec  59%
-  < 92272 msg/sec  71%
-  < 103010 msg/sec  80%
-  < 113749 msg/sec  84%
-  < 124488 msg/sec  90%
-  < 135227 msg/sec  96%
-  < 145966 msg/sec  99%
-  < 156705 msg/sec  100%
+  < 14921 msg/sec  20%
+  < 17323 msg/sec  40%
+  < 22128 msg/sec  50%
+  < 26934 msg/sec  70%
+  < 31739 msg/sec  80%
+  < 34141 msg/sec  90%
+  < 38946 msg/sec  100%
 ```
