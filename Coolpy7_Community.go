@@ -94,23 +94,10 @@ func main() {
 		log.Fatal("websocket_host fields config not found")
 	}
 
-	tcpTlsPem, ok := config.String("tcp_tls_pem")
-	if !ok {
-		log.Fatal("tcp_tls_pem fields config not found")
-	}
-	tcpTlsKey, ok := config.String("tcp_tls_key")
-	if !ok {
-		log.Fatal("tcp_tls_key fields config not found")
-	}
-
-	websocketTlsPem, ok := config.String("websocket_tls_pem")
-	if !ok {
-		log.Fatal("websocket_tls_pem fields config not found")
-	}
-	websocketTlsKey, ok := config.String("websocket_tls_key")
-	if !ok {
-		log.Fatal("websocket_tls_key fields config not found")
-	}
+	tcpTlsPem, _ := config.String("tcp_tls_pem")
+	tcpTlsKey, _ := config.String("tcp_tls_key")
+	websocketTlsPem, _ := config.String("websocket_tls_pem")
+	websocketTlsKey, _ := config.String("websocket_tls_key")
 
 	if err := os.RemoveAll(wsProxy.SockAddr); err != nil {
 		log.Fatal(err)
