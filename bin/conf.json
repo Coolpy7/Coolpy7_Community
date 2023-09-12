@@ -1,0 +1,28 @@
+//Coolpy7 community版配置文件
+{
+  //tcp服务端口号
+  "host": ":1883",
+  //tcp的tls服务pem证书路径
+  //例：/etc/aaa.pem
+  "tcp_tls_pem": "",
+  //tcp的tls服务key证书路径
+  //例：/etc/aaa.key
+  "tcp_tls_key": "",
+  //websocket服务端口号
+  "websocket_host": ":8083",
+  //websocket的tls服务pem证书路径
+  //例：/etc/aaa.pem
+  "websocket_tls_pem": "",
+  //websocket的tls服务key证书路径
+  //例：/etc/aaa.key
+  "websocket_tls_key": "",
+  //启用jwt验证功能，支持多jwt认证，通过","号分隔多个jwt
+  //例：jksjdfkjsdf,32234jsdkfj
+  "jwt_secret_key": "",
+  //防止ping包风暴影响性能，单位/秒，低于此值客户端ping包到达主动禁用此客户端
+  "self_ddos_deny": 59,
+  //离线消息补发触发器时间间隔，单位/秒
+  "lazy_msg": 30,
+  //防空连攻击，空接断开限时，单位/秒
+  "nil_conn_deny": 2
+}

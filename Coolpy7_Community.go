@@ -14,7 +14,6 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"github.com/Coolpy7/Coolpy7_Community/broker"
 	ntls "github.com/Coolpy7/Coolpy7_Community/extension/tls"
@@ -22,47 +21,96 @@ import (
 	"github.com/Coolpy7/Coolpy7_Community/pollio"
 	"github.com/Coolpy7/Coolpy7_Community/std/crypto/tls"
 	"github.com/Coolpy7/Coolpy7_Community/wsProxy"
+	"github.com/gookit/config"
 	"golang.org/x/sys/unix"
 	"log"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"strings"
 	"syscall"
 )
 
-var version = "1.0.1"
-var goversion = "1.19.4"
+var version = "1.0.2"
+var goversion = "1.20.6"
 
 var eng *broker.Engine
 
 func main() {
 	setLimit()
-	var (
-		addr         = flag.String("l", ":1883", "host port (default 1883)")
-		pem          = flag.String("p", "", "tls pem file path")
-		key          = flag.String("k", "", "tls key file path")
-		wsAddr       = flag.String("w", ":8083", "host ws port (default 8083)")
-		wsPem        = flag.String("wp", "", "wss pem file path")
-		wsKey        = flag.String("wk", "", "wss key file path")
-		jwtSecretKey = flag.String("j", "", "jwt secret key(multiple split by ,)")
-		SelfDdos     = flag.Int("sd", 59, "self ddos deny seconds")
-		LazyMsg      = flag.Int("lm", 30, "lazy qos message resend seconds")
-		NilConn      = flag.Int("nc", 2, "nil connect deny seconds")
-	)
-	flag.Parse()
+	config.WithOptions(config.ParseEnv)
+	config.AddDriver(config.JSONDriver)
+
+	keys := []string{"host", "tcp_tls_pem", "tcp_tls_key", "websocket_host", "websocket_tls_pem", "websocket_tls_key", "jwt_secret_key", "self_ddos_deny:int", "lazy_msg:int", "nil_conn_deny:int"}
+	_ = config.LoadFlags(keys)
+
+	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
+	if err != nil {
+		log.Fatal(err)
+	}
+	if _, err = os.Stat(dir + "/conf.json"); err != nil {
+		log.Fatal("not found conf.json file")
+	}
+	err = config.LoadFiles(dir + "/conf.json")
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	eng = broker.NewEngine()
-	if *jwtSecretKey != "" {
-		jsks := strings.Split(*jwtSecretKey, ",")
+
+	jwt, ok := config.String("jwt_secret_key")
+	if ok {
+		jsks := strings.Split(jwt, ",")
 		if len(jsks) > 0 {
 			for _, jsk := range jsks {
 				eng.JwtSecretKey = append(eng.JwtSecretKey, []byte(jsk))
 			}
 		}
 	}
-	eng.SelfDdosDeny = *SelfDdos
-	eng.LazyMsgSend = *LazyMsg
-	eng.NilConnDeny = *NilConn
+
+	ddos, ok := config.Int("self_ddos_deny")
+	if !ok {
+		log.Fatal("self_ddos_deny fields config not found")
+	}
+	eng.SelfDdosDeny = ddos
+	lazyMsg, ok := config.Int("lazy_msg")
+	if !ok {
+		log.Fatal("lazy_msg fields config not found")
+	}
+	eng.LazyMsgSend = lazyMsg
+	nilConnDeny, ok := config.Int("nil_conn_deny")
+	if !ok {
+		log.Fatal("nil_conn_deny fields config not found")
+	}
+	eng.NilConnDeny = nilConnDeny
+
+	host, ok := config.String("host")
+	if !ok {
+		log.Fatal("host fields config not found")
+	}
+
+	websocketHost, ok := config.String("websocket_host")
+	if !ok {
+		log.Fatal("websocket_host fields config not found")
+	}
+
+	tcpTlsPem, ok := config.String("tcp_tls_pem")
+	if !ok {
+		log.Fatal("tcp_tls_pem fields config not found")
+	}
+	tcpTlsKey, ok := config.String("tcp_tls_key")
+	if !ok {
+		log.Fatal("tcp_tls_key fields config not found")
+	}
+
+	websocketTlsPem, ok := config.String("websocket_tls_pem")
+	if !ok {
+		log.Fatal("websocket_tls_pem fields config not found")
+	}
+	websocketTlsKey, ok := config.String("websocket_tls_key")
+	if !ok {
+		log.Fatal("websocket_tls_key fields config not found")
+	}
 
 	if err := os.RemoveAll(wsProxy.SockAddr); err != nil {
 		log.Fatal(err)
@@ -82,17 +130,17 @@ func main() {
 
 	poll := pollio.NewEngine(pollio.Config{
 		Network:      "tcp", //"udp", "unix"
-		Addrs:        []string{*addr},
+		Addrs:        []string{host},
 		EPOLLONESHOT: unix.EPOLLONESHOT,
 		EpollMod:     unix.EPOLLET,
 	})
 
-	if *pem != "" && *key != "" {
-		btsKey, err := os.ReadFile(*key)
+	if tcpTlsPem != "" && tcpTlsKey != "" {
+		btsKey, err := os.ReadFile(tcpTlsKey)
 		if err != nil {
 			log.Fatal(err)
 		}
-		btsPem, err := os.ReadFile(*pem)
+		btsPem, err := os.ReadFile(tcpTlsPem)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -124,19 +172,19 @@ func main() {
 	}
 
 	go func() {
-		if err := poll.Start(); err != nil {
+		if err = poll.Start(); err != nil {
 			log.Println(err)
 		}
 	}()
 	go func() {
-		if err := pollUnix.Start(); err != nil {
+		if err = pollUnix.Start(); err != nil {
 			log.Println(err)
 		}
 	}()
-	log.Println("Coolpy7 Community On Port", *addr)
+	log.Println("Coolpy7 Community On Port", host)
 
 	wsp := wsProxy.NewWsProxy()
-	err := wsp.Start(*wsAddr, *wsPem, *wsKey)
+	err = wsp.Start(websocketHost, websocketTlsPem, websocketTlsKey)
 	if err != nil {
 		log.Printf("Coolpy7 ws host error %s", err)
 	}

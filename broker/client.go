@@ -60,7 +60,7 @@ func NewClient(conn *pollio.Conn, eng *Engine) *Client {
 		Cache:      bytes.Buffer{},
 	}
 	c.tm = eng.tm.ScheduleFunc(time.Duration(c.eng.LazyMsgSend)*time.Second, c.TickFunc)
-	//客户端连接后2秒种内接收不到登陆包直接关闭连接
+	//客户端连接后x秒种内接收不到登陆包直接关闭连接
 	eng.tm.AfterFunc(time.Duration(c.eng.NilConnDeny)*time.Second, func() {
 		if !c.isLogin {
 			_ = c.conn.Close()

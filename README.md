@@ -29,36 +29,42 @@ Coolpy7社区版 是基于Epoll为通信核心开发的高性能MQTT服务库，
 
 [这里](https://github.com/Coolpy7/Coolpy7_Community/releases) 下载最新版本的各系统平台编译运行文件。
 
-### 2 服务参数
+### 2 服务参数配置项
 
 ```
-$ ./coolpy7_community_linux -h
-$ Usage of ./coolpy7_community_linux:
-  -j string
-        jwt secret key(multiple split by ,
-  -k string
-        tls key file path
-  -l string
-        host port (default 1883) (default ":1883")
-  -p string
-        tls pem file path
-  -w string
-        host ws port (default 8083) (default ":8083")
-  -wk string
-        wss key file path
-  -wp string
-        wss pem file path
+//Coolpy7 community版配置文件
+{
+  //tcp服务端口号
+  "host": ":1883",
+  //tcp的tls服务pem证书路径
+  //例：/etc/aaa.pem
+  "tcp_tls_pem": "",
+  //tcp的tls服务key证书路径
+  //例：/etc/aaa.key
+  "tcp_tls_key": "",
+  //websocket服务端口号
+  "websocket_host": ":8083",
+  //websocket的tls服务pem证书路径
+  //例：/etc/aaa.pem
+  "websocket_tls_pem": "",
+  //websocket的tls服务key证书路径
+  //例：/etc/aaa.key
+  "websocket_tls_key": "",
+  //启用jwt验证功能，支持多jwt认证，通过","号分隔多个jwt
+  //例：jksjdfkjsdf,32234jsdkfj
+  "jwt_secret_key": "",
+  //防止ping包风暴影响性能，单位/秒，低于此值客户端ping包到达主动禁用此客户端
+  "self_ddos_deny": 59,
+  //离线消息补发触发器时间间隔，单位/秒
+  "lazy_msg": 30,
+  //防空连攻击，空接断开限时，单位/秒
+  "nil_conn_deny": 2
+}
 ```
 
-参数说明:
+参数文件路径:
 
-* `-l` tcp服务端口参数。 默认值1883端口，例示 :1883。
-* `-w` websocket服务端口参数。 默认值8083端口，例示 :8083。
-* `-j` jwt密钥参数。 默认值为空时MQTT服务不做任何身份验证，多个密钥是以半角豆号（,)分隔。例示 jwtsk1,jwtsk2,jwtsk3。
-* `-p` tls服务pem证书文件绝对路径。 
-* `-k` tls服务key证书文件绝对路径。
-* `-wp` websocket wss服务pem证书文件绝对路径。
-* `-wk` websocket wss服务key证书文件绝对路径。
+* 配置文件固定文件名为conf.json并位于与本服务程序相同路径下
 
 ### 3 运行服务
 
@@ -66,10 +72,15 @@ $ Usage of ./coolpy7_community_linux:
 * 启动服务前请先确认相关执行权限
 
 ```
-$ ./coolpy7_community_xxx -l=:1883 -w=:8083
-$ 2023/06/21 17:57:16 Coolpy7 Community On Port :1883
-$ 2023/06/21 17:57:16 Coolpy7 Community Websocket On Port :8083
+$ sudo chmod -x coolpy7_community_xxx
+```
 
+启动成功提示:
+
+```
+$ Coolpy7 Community On Port :1883
+$ Coolpy7 Community Websocket On Port :8083
+$ Coolpy7 v1.0.2 build golang v1.20.6
 ```
 
 ### 4 安全关闭服务
