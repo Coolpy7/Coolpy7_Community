@@ -32,7 +32,7 @@ import (
 )
 
 var version = "1.0.2"
-var goversion = "1.20.6"
+var goversion = "1.22.2"
 
 var eng *broker.Engine
 
@@ -59,7 +59,7 @@ func main() {
 	eng = broker.NewEngine()
 
 	jwt, ok := config.String("jwt_secret_key")
-	if ok {
+	if ok && jwt != "" {
 		jsks := strings.Split(jwt, ",")
 		if len(jsks) > 0 {
 			for _, jsk := range jsks {
