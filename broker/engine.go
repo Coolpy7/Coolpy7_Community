@@ -15,6 +15,7 @@
 package broker
 
 import (
+	"github.com/Coolpy7/Coolpy7_Community/ipblocker"
 	"github.com/Coolpy7/Coolpy7_Community/multimap"
 	"github.com/Coolpy7/Coolpy7_Community/pollio"
 	"github.com/Coolpy7/Coolpy7_Community/std/crypto/tls"
@@ -35,6 +36,9 @@ type Engine struct {
 	SelfDdosDeny int
 	LazyMsgSend  int
 	NilConnDeny  int
+	BlockTime    int
+	MaxAttempts  int
+	IpBlocker    *ipblocker.Blocker // 增加Blocker字段
 }
 
 func NewEngine() *Engine {
@@ -42,6 +46,8 @@ func NewEngine() *Engine {
 		SelfDdosDeny: 60,
 		LazyMsgSend:  30,
 		NilConnDeny:  2,
+		BlockTime:    1800,
+		MaxAttempts:  5,
 		Subscribed:   topic.NewStandardTree(),
 		Retained:     &sync.Map{},
 		Clients:      &sync.Map{},
@@ -53,6 +59,10 @@ func NewEngine() *Engine {
 	}
 	go eng.tm.Run()
 	return &eng
+}
+
+func (e *Engine) InitIpBlocker() {
+	e.IpBlocker = ipblocker.NewBlocker(e.BlockTime, e.MaxAttempts, "cp7")
 }
 
 func (e *Engine) AddClient(conn *pollio.Conn, tlsConn *tls.Conn) *Client {
@@ -79,4 +89,5 @@ func (e *Engine) DelClient(conn *pollio.Conn) {
 
 func (e *Engine) Close() {
 	e.tm.Stop()
+	e.IpBlocker.Close()
 }

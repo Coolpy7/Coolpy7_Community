@@ -83,6 +83,17 @@ func main() {
 		log.Fatal("nil_conn_deny fields config not found")
 	}
 	eng.NilConnDeny = nilConnDeny
+	BlockTime, ok := config.Int("block_time")
+	if !ok {
+		log.Fatal("block_time fields config not found")
+	}
+	eng.BlockTime = BlockTime
+	MaxAttempts, ok := config.Int("max_attempts")
+	if !ok {
+		log.Fatal("max_attempts fields config not found")
+	}
+	eng.MaxAttempts = MaxAttempts
+	eng.InitIpBlocker()
 
 	host, ok := config.String("host")
 	if !ok {

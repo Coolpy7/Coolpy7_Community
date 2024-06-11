@@ -196,6 +196,13 @@ func (c *Client) processConnect(pkt *packet.Connect) error {
 			}
 		}
 		if !valid {
+			// 获取客户端IP，并注册失败尝试
+			clientIP := strings.Split(c.conn.RemoteAddr().String(), ":")[0]
+			if c.eng.IpBlocker.RegisterFailedAttempt(clientIP) {
+				connack.ReturnCode = packet.NotAuthorized
+				_ = c.send(connack)
+				return errors.New("ErrNotAuthorized: IP blocked")
+			}
 			connack.ReturnCode = packet.NotAuthorized
 			_ = c.send(connack)
 			return errors.New("ErrNotAuthorized")
