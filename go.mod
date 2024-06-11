@@ -4,7 +4,6 @@ go 1.22.1
 
 require (
 	github.com/antlabs/timer v0.1.3
-	github.com/coreos/go-iptables v0.7.0
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gookit/config v1.1.0
 	github.com/stretchr/testify v1.9.0
