@@ -31,7 +31,7 @@ import (
 	"syscall"
 )
 
-var version = "1.0.2"
+var version = "1.0.3"
 var goversion = "1.22.2"
 
 var eng *broker.Engine
