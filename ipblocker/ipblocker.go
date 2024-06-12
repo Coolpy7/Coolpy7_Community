@@ -44,10 +44,6 @@ func NewBlocker(blockTime int, maxAttempts int, identifier string) *Blocker {
 
 // BlockIP 封禁IP
 func (b *Blocker) BlockIP(ip string) error {
-	if ip == "127.0.0.1" || ip == "::1" || ip == "localhost" { // 忽略本地地址
-		return nil
-	}
-
 	comment := fmt.Sprintf("blocker-%s", b.Identifier)
 	cmd := exec.Command("iptables", "-A", "INPUT", "-s", ip, "-m", "comment", "--comment", comment, "-j", "DROP")
 	if err := cmd.Run(); err != nil {
@@ -74,10 +70,6 @@ func (b *Blocker) UnblockIP(ip string) error {
 
 // RegisterFailedAttempt 注册一次失败的尝试
 func (b *Blocker) RegisterFailedAttempt(ip string) bool {
-	if ip == "127.0.0.1" || ip == "::1" || ip == "localhost" { // 忽略本地地址
-		return false
-	}
-
 	failCount, _ := b.failCounts.LoadOrStore(ip, 1)
 	counter := 0 // default start counter
 

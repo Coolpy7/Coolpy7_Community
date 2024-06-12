@@ -16,31 +16,42 @@ package broker
 
 import (
 	"errors"
+	"github.com/Coolpy7/Coolpy7_Community/iohttp/websocket"
 	"github.com/Coolpy7/Coolpy7_Community/mempool"
 	"github.com/Coolpy7/Coolpy7_Community/packet"
+	"github.com/Coolpy7/Coolpy7_Community/pollio"
 )
 
 func (c *Client) send(pkt packet.Generic) error {
-	isClose, err := c.conn.IsClosed()
-	if err == nil && isClose {
-		return errors.New("closed")
-	}
 	buf := mempool.Malloc(pkt.Len())
 	defer mempool.Free(buf)
 	n, _ := pkt.Encode(buf)
 	if n != len(buf) {
 		return errors.New("encode err")
 	}
-	if !c.isTls {
-		_, err := c.conn.Write(buf)
-		if err != nil {
-			return err
+	switch conn := c.conn.(type) {
+	case *pollio.Conn:
+		isClose, err := conn.IsClosed()
+		if err == nil && isClose {
+			return errors.New("closed")
 		}
-	} else {
-		_, err := c.tlsConn.Write(buf)
+		if !c.isTls {
+			_, err = conn.Write(buf)
+			if err != nil {
+				return err
+			}
+		} else {
+			_, err = c.tlsConn.Write(buf)
+			if err != nil {
+				return err
+			}
+		}
+	case *websocket.Conn:
+		err := conn.WriteMessage(websocket.BinaryMessage, buf)
 		if err != nil {
 			return err
 		}
 	}
+
 	return nil
 }

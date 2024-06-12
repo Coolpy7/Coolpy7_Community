@@ -58,7 +58,11 @@ Coolpy7社区版 是基于Epoll为通信核心开发的高性能MQTT服务库，
   //离线消息补发触发器时间间隔，单位/秒
   "lazy_msg": 30,
   //防空连攻击，空接断开限时，单位/秒
-  "nil_conn_deny": 2
+  "nil_conn_deny": 2,
+  //密码错误禁连限时，单位/秒
+  "block_time": 1800,
+  //密码容错次数，单位/次
+  "max_attempts": 5
 }
 ```
 

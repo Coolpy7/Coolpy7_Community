@@ -17,6 +17,7 @@ import (
 	"fmt"
 	"github.com/Coolpy7/Coolpy7_Community/broker"
 	ntls "github.com/Coolpy7/Coolpy7_Community/extension/tls"
+	"github.com/Coolpy7/Coolpy7_Community/iohttp/websocket"
 	"github.com/Coolpy7/Coolpy7_Community/packet"
 	"github.com/Coolpy7/Coolpy7_Community/pollio"
 	"github.com/Coolpy7/Coolpy7_Community/std/crypto/tls"
@@ -31,7 +32,7 @@ import (
 	"syscall"
 )
 
-var version = "1.0.3"
+var version = "1.0.4"
 var goversion = "1.22.2"
 
 var eng *broker.Engine
@@ -110,22 +111,6 @@ func main() {
 	websocketTlsPem, _ := config.String("websocket_tls_pem")
 	websocketTlsKey, _ := config.String("websocket_tls_key")
 
-	if err := os.RemoveAll(wsProxy.SockAddr); err != nil {
-		log.Fatal(err)
-	}
-	pollUnix := pollio.NewEngine(pollio.Config{
-		Network:      "unix", //"udp", "unix"
-		Addrs:        []string{wsProxy.SockAddr},
-		EPOLLONESHOT: unix.EPOLLONESHOT,
-		EpollMod:     unix.EPOLLET,
-	})
-	// hanlde new connection
-	pollUnix.OnOpen(OnConnect)
-	// hanlde connection closed
-	pollUnix.OnClose(OnDisconnect)
-	// handle data
-	pollUnix.OnData(OnMessage)
-
 	poll := pollio.NewEngine(pollio.Config{
 		Network:      "tcp", //"udp", "unix"
 		Addrs:        []string{host},
@@ -174,14 +159,12 @@ func main() {
 			log.Println(err)
 		}
 	}()
-	go func() {
-		if err = pollUnix.Start(); err != nil {
-			log.Println(err)
-		}
-	}()
 	log.Println("Coolpy7 Community On Port", host)
 
 	wsp := wsProxy.NewWsProxy()
+	wsp.Upgrader.OnOpen(OnWsConnect)
+	wsp.Upgrader.OnMessage(OnWsMessage)
+	wsp.Upgrader.OnClose(OnWsDisconnect)
 	err = wsp.Start(websocketHost, websocketTlsPem, websocketTlsKey)
 	if err != nil {
 		log.Printf("Coolpy7 ws host error %s", err)
@@ -196,7 +179,6 @@ func main() {
 			log.Println("Waiting For Coolpy7 Community Close...")
 			wsp.Srv.Stop()
 			poll.Stop()
-			pollUnix.Stop()
 			eng.Close()
 			fmt.Println("safe exit")
 			cleanupDone <- true
@@ -223,6 +205,54 @@ func OnDisconnect(conn *pollio.Conn, err error) {
 }
 
 func OnMessage(conn *pollio.Conn, data []byte) {
+	c, ok := eng.GetClient(conn)
+	if !ok {
+		_ = conn.Close()
+		return
+	}
+	c.Cache.Write(data)
+	packetLength, packetType := packet.DetectPacket(c.Cache.Bytes())
+	if packetLength <= 0 {
+		return
+	}
+	if uint64(packetLength) > packet.MaxVarint {
+		c.Close()
+		return
+	}
+	if c.Cache.Len() < packetLength {
+		return
+	}
+	defer c.Cache.Truncate(0)
+	pkt, err := packetType.New()
+	if err != nil {
+		c.Close()
+		return
+	}
+	_, err = pkt.Decode(c.Cache.Bytes())
+	if err != nil {
+		c.Close()
+		return
+	}
+	err = c.Receive(pkt)
+	if err != nil {
+		c.Close()
+	}
+}
+
+func OnWsConnect(conn *websocket.Conn) {
+	eng.AddClient(conn, nil)
+}
+
+func OnWsDisconnect(conn *websocket.Conn, err error) {
+	c, ok := eng.GetClient(conn)
+	if ok {
+		go c.Wills()
+		c.Clear()
+		eng.DelClient(conn)
+	}
+}
+
+func OnWsMessage(conn *websocket.Conn, messageType websocket.MessageType, data []byte) {
 	c, ok := eng.GetClient(conn)
 	if !ok {
 		_ = conn.Close()

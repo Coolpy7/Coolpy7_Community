@@ -17,7 +17,6 @@ package broker
 import (
 	"github.com/Coolpy7/Coolpy7_Community/ipblocker"
 	"github.com/Coolpy7/Coolpy7_Community/multimap"
-	"github.com/Coolpy7/Coolpy7_Community/pollio"
 	"github.com/Coolpy7/Coolpy7_Community/std/crypto/tls"
 	"github.com/Coolpy7/Coolpy7_Community/topic"
 	"github.com/antlabs/timer"
@@ -65,7 +64,7 @@ func (e *Engine) InitIpBlocker() {
 	e.IpBlocker = ipblocker.NewBlocker(e.BlockTime, e.MaxAttempts, "cp7")
 }
 
-func (e *Engine) AddClient(conn *pollio.Conn, tlsConn *tls.Conn) *Client {
+func (e *Engine) AddClient(conn interface{}, tlsConn *tls.Conn) *Client {
 	c := NewClient(conn, e)
 	if tlsConn != nil {
 		c.tlsConn = tlsConn
@@ -75,7 +74,7 @@ func (e *Engine) AddClient(conn *pollio.Conn, tlsConn *tls.Conn) *Client {
 	return c
 }
 
-func (e *Engine) GetClient(conn *pollio.Conn) (*Client, bool) {
+func (e *Engine) GetClient(conn interface{}) (*Client, bool) {
 	c, ok := e.Clients.Load(conn)
 	if ok {
 		return c.(*Client), ok
@@ -83,7 +82,7 @@ func (e *Engine) GetClient(conn *pollio.Conn) (*Client, bool) {
 	return nil, ok
 }
 
-func (e *Engine) DelClient(conn *pollio.Conn) {
+func (e *Engine) DelClient(conn interface{}) {
 	e.Clients.Delete(conn)
 }
 

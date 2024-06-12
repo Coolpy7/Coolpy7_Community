@@ -17,6 +17,7 @@ package broker
 import (
 	"bytes"
 	"errors"
+	"github.com/Coolpy7/Coolpy7_Community/iohttp/websocket"
 	"github.com/Coolpy7/Coolpy7_Community/packet"
 	"github.com/Coolpy7/Coolpy7_Community/pollio"
 	"github.com/Coolpy7/Coolpy7_Community/std/crypto/tls"
@@ -28,7 +29,7 @@ import (
 )
 
 type Client struct {
-	conn    *pollio.Conn
+	conn    interface{}
 	tlsConn *tls.Conn
 	isTls   bool
 	resp    *packet.Pingresp
@@ -48,7 +49,7 @@ type Client struct {
 	pingTime int64
 }
 
-func NewClient(conn *pollio.Conn, eng *Engine) *Client {
+func NewClient(conn interface{}, eng *Engine) *Client {
 	c := &Client{
 		pingTime:   0,
 		isLogin:    false,
@@ -63,7 +64,12 @@ func NewClient(conn *pollio.Conn, eng *Engine) *Client {
 	//客户端连接后x秒种内接收不到登陆包直接关闭连接
 	eng.tm.AfterFunc(time.Duration(c.eng.NilConnDeny)*time.Second, func() {
 		if !c.isLogin {
-			_ = c.conn.Close()
+			switch conn := c.conn.(type) {
+			case *pollio.Conn:
+				_ = conn.Close()
+			case *websocket.Conn:
+				_ = conn.Close()
+			}
 		}
 	})
 	return c
@@ -197,7 +203,13 @@ func (c *Client) processConnect(pkt *packet.Connect) error {
 		}
 		if !valid {
 			// 获取客户端IP，并注册失败尝试
-			clientIP := strings.Split(c.conn.RemoteAddr().String(), ":")[0]
+			var clientIP string
+			switch conn := c.conn.(type) {
+			case *pollio.Conn:
+				clientIP = strings.Split(conn.RemoteAddr().String(), ":")[0]
+			case *websocket.Conn:
+				clientIP = strings.Split(conn.RemoteAddr().String(), ":")[0]
+			}
 			if c.eng.IpBlocker.RegisterFailedAttempt(clientIP) {
 				connack.ReturnCode = packet.NotAuthorized
 				_ = c.send(connack)
@@ -453,10 +465,12 @@ func (c *Client) processPubcomp(id packet.ID) error {
 func (c *Client) processDisconnect() error {
 	c.ClearWill()
 	//ws conn abort
-	if strings.Contains(c.conn.RemoteAddr().String(), "@") {
-		_ = c.conn.Close()
+	switch conn := c.conn.(type) {
+	case *pollio.Conn:
+		_ = conn.Close()
+	case *websocket.Conn:
+		_ = conn.Close()
 	}
-	_ = c.conn.Close()
 	return nil
 }
 
@@ -466,5 +480,11 @@ func (c *Client) Clear() {
 }
 
 func (c *Client) Close() {
-	_ = c.conn.Close()
+	//ws conn abort
+	switch conn := c.conn.(type) {
+	case *pollio.Conn:
+		_ = conn.Close()
+	case *websocket.Conn:
+		_ = conn.Close()
+	}
 }

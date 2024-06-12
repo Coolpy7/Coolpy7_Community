@@ -22,84 +22,26 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"sync"
-	"time"
 )
 
-const SockAddr = "/tmp/cp9.sock"
-
 type WsProxy struct {
-	Clients  *sync.Map
 	Srv      *iohttp.Server
-	upgrader *websocket.Upgrader
+	Upgrader *websocket.Upgrader
 }
 
 func NewWsProxy() *WsProxy {
-	ws := WsProxy{
-		Clients: &sync.Map{},
-	}
+	ws := WsProxy{}
 	upgrader := websocket.NewUpgrader()
 	upgrader.CheckOrigin = func(r *http.Request) bool {
 		return true
 	}
 	upgrader.Subprotocols = []string{"mqtt", "mqttv3.1"}
-	upgrader.OnOpen(ws.OnConnect)
-	upgrader.OnMessage(ws.OnMessage)
-	upgrader.OnClose(ws.OnDisconnect)
-	ws.upgrader = upgrader
+	ws.Upgrader = upgrader
 	return &ws
 }
 
-func (w *WsProxy) AddClient(conn *websocket.Conn) (*WsBridge, error) {
-	wp, err := NewWsbridge(conn)
-	if err != nil {
-		_ = conn.Close()
-		return nil, err
-	}
-	w.Clients.Store(conn, wp)
-	return wp, nil
-}
-
-func (w *WsProxy) GetClient(conn *websocket.Conn) (*WsBridge, bool) {
-	c, ok := w.Clients.Load(conn)
-	if ok {
-		return c.(*WsBridge), ok
-	}
-	return nil, ok
-}
-
-func (w *WsProxy) DelClient(conn *websocket.Conn) {
-	w.Clients.Delete(conn)
-}
-
-func (w *WsProxy) OnConnect(conn *websocket.Conn) {
-	wsb, err := w.AddClient(conn)
-	if err != nil {
-		wsb.Close()
-	}
-}
-
-func (w *WsProxy) OnDisconnect(conn *websocket.Conn, err error) {
-	wsb, ok := w.GetClient(conn)
-	if ok {
-		w.DelClient(conn)
-		wsb.Close()
-	}
-}
-
-func (w *WsProxy) OnMessage(conn *websocket.Conn, messageType websocket.MessageType, data []byte) {
-	_ = conn.SetDeadline(time.Time{})
-	wsb, ok := w.GetClient(conn)
-	if ok {
-		err := wsb.Receive(data)
-		if err != nil {
-			wsb.Close()
-		}
-	}
-}
-
 func (ws *WsProxy) onWebsocket(w http.ResponseWriter, r *http.Request) {
-	_, err := ws.upgrader.Upgrade(w, r, nil)
+	_, err := ws.Upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 	}
