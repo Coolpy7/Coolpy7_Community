@@ -20,13 +20,13 @@
   //例：jksjdfkjsdf,32234jsdkfj
   "jwt_secret_key": "",
   //防止ping包风暴影响性能，单位/秒，低于此值客户端ping包到达主动禁用此客户端
-  "self_ddos_deny": 59,
+  "self_ddos_deny": 60,
   //离线消息补发触发器时间间隔，单位/秒
   "lazy_msg": 30,
   //防空连攻击，空接断开限时，单位/秒
   "nil_conn_deny": 2,
-  //密码错误禁连限时，单位/秒
+  //密码错误或self_ddos攻击时禁连限时，单位/秒
   "block_time": 1800,
-  //密码容错次数，单位/次
+  //密码容错或self_ddos攻击次数，单位/次
   "max_attempts": 5
 }

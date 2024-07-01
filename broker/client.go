@@ -260,7 +260,17 @@ func (c *Client) processPingreq() error {
 		c.pingTime = time.Now().Unix()
 	} else {
 		if int(time.Now().Unix()-c.pingTime) < c.eng.SelfDdosDeny {
-			return errors.New("self ddos")
+			// 获取客户端IP，并注册失败尝试
+			var clientIP string
+			switch conn := c.conn.(type) {
+			case *pollio.Conn:
+				clientIP = strings.Split(conn.RemoteAddr().String(), ":")[0]
+			case *websocket.Conn:
+				clientIP = strings.Split(conn.RemoteAddr().String(), ":")[0]
+			}
+			if c.eng.IpBlocker.RegisterFailedAttempt(clientIP) {
+				return errors.New("ErrSelfDdos: IP blocked")
+			}
 		} else {
 			c.pingTime = time.Now().Unix()
 		}
