@@ -22,6 +22,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 )
 
 type WsProxy struct {
@@ -41,10 +42,13 @@ func NewWsProxy() *WsProxy {
 }
 
 func (ws *WsProxy) onWebsocket(w http.ResponseWriter, r *http.Request) {
-	_, err := ws.Upgrader.Upgrade(w, r, nil)
+	conn, err := ws.Upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
+		return
 	}
+	_ = conn.SetReadDeadline(time.Time{})
+	_ = conn.SetWriteDeadline(time.Time{})
 }
 
 func (ws *WsProxy) Start(addr, pem, key string) error {
