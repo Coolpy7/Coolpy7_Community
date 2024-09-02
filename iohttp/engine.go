@@ -470,7 +470,7 @@ func (e *Engine) DataHandler(c *pollio.Conn, data []byte) {
 	}
 	err := parser.Read(data)
 	if err != nil {
-		log.Printf("parser.Read failed: %v", err)
+		//log.Printf("parser.Read failed: %v", err)
 		c.CloseWithError(err)
 	}
 }
@@ -506,7 +506,7 @@ func (e *Engine) TLSDataHandler(c *pollio.Conn, data []byte) {
 			if nread > 0 {
 				err := parser.Read(buffer[:nread])
 				if err != nil {
-					log.Printf("parser.Read failed: %v", err)
+					//log.Printf("parser.Read failed: %v", err)
 					c.CloseWithError(err)
 					return
 				}
@@ -783,7 +783,7 @@ func (engine *Engine) readTLSConnBlocking(conn net.Conn, tlsConn *tls.Conn, pars
 			if nread > 0 {
 				err = parser.Read(buffer[:nread])
 				if err != nil {
-					log.Printf("parser.Read failed: %v", err)
+					//log.Printf("parser.Read failed: %v", err)
 					return
 				}
 			}
